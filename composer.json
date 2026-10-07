@@ -1,0 +1,45 @@
+{
+    "name": "omniguard/altcha",
+    "type": "library",
+    "description": "Omniguard ALTCHA: a proof of work the site issues and checks itself, on altcha-org/altcha - a challenge signed with the site's key, the solution the visitor's browser found checked, a solution refused the second time; no third party, no cookie.",
+    "keywords": [
+        "captcha",
+        "altcha",
+        "proof-of-work",
+        "privacy",
+        "antispam",
+        "omniguard"
+    ],
+    "homepage": "https://github.com/glitchr-studio/omniguard-altcha",
+    "license": "LGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Marco Meyer",
+            "email": "marco.meyer@glitchr.io"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "altcha-org/altcha": "^2.3",
+        "glitchr/omniguard": "^1.0@dev"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Omniguard\\Altcha\\": ""
+        },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Omniguard\\Altcha\\Tests\\": "Tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
