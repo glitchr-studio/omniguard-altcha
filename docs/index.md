@@ -65,7 +65,7 @@ ALTCHA does not know where the widget was shown.
 | `expires` | 600 | seconds a challenge may be solved and posted in |
 | `challenge_url` | none | where the widget fetches its challenge; none: the challenge is in the page |
 | `field` | `altcha` | the posted field |
-| `script` | jsDelivr, `altcha@3.3.0/dist/main/altcha.min.js` | the widget's script; `integrity` is set for that address |
+| `script` | jsDelivr, `altcha@3.3.0/dist/main/altcha.min.js`; in Symfony, the site's own copy (`/omniguard/altcha/3.3.0/altcha.min.js`) | the widget's script; `integrity` is set for both addresses |
 | `integrity` | | the script's Subresource Integrity, for another address |
 | `attributes` | `{}` | `<altcha-widget>`'s own attributes: `auto` (`onsubmit`, `onfocus`, `onload`), `display`, `language`, `type`, `theme`, `workers` |
 | `configuration` | `{}` | its `configuration` attribute, as JSON: `{hideFooter: true}`, `{minDuration: 1000}` |
@@ -73,19 +73,31 @@ ALTCHA does not know where the widget was shown.
 The widget is printed as `<script type="module" async defer>` and `<altcha-widget challenge="..."
 name="altcha">`.
 
-## The script: yours or a CDN's
+## The script: the site's own
 
-By default the widget's script comes from jsDelivr, pinned and checked
-(`integrity="sha256-/CeoPc2Yo9is9tcPvkZD3L7lEqv7mIhu3Y7QRTUK2Ck="`, computed on 2026-10-07):
+The widget's script - `altcha` 3.3.0's `dist/main/altcha.min.js`, MIT - is **shipped in this
+package** (`public/altcha.min.js`, its licence beside it, `AltchaGatewayFactory::SCRIPT_FILE`),
+unchanged: its integrity is `sha256-/CeoPc2Yo9is9tcPvkZD3L7lEqv7mIhu3Y7QRTUK2Ck=`
+(`AltchaGatewayFactory::INTEGRITY`), the same as the CDN's. It loads nothing else: its workers are
+data: URLs (`worker-src 'self' data:` in a Content-Security-Policy).
+
+**In a Symfony application** the bridge serves it at `/omniguard/altcha/3.3.0/altcha.min.js`
+(`AltchaGatewayFactory::SCRIPT_PATH`, cached a year) and makes that the gateways' default: the
+widget reaches nobody - `Widget::$origins` is empty, `reachesOthers()` false, no consent to ask.
+Nothing to install, no route to import, no asset pipeline. `omniguard.serve_scripts: false` goes
+back to the CDN.
+
+**In PHP alone** the default stays jsDelivr, pinned and checked (`AltchaGatewayFactory::SCRIPT`):
 `Widget::$origins` then names `https://cdn.jsdelivr.net` - a CDN sees the visitor's address, though
-the check itself stays on the site (`thirdParty: false`). Serve it yourself and nobody does:
+the check itself stays on the site (`thirdParty: false`). Serve the package's copy yourself and
+nobody does:
 
 ```sh
-npm install altcha          # node_modules/altcha/dist/main/altcha.min.js
+cp vendor/omniguard/altcha/public/altcha.min.js public/js/altcha.min.js
 ```
 
-```yaml
-options: { hmac_key: '%env(ALTCHA_HMAC_KEY)%', script: /js/altcha.min.js }
+```php
+$gateway = (new AltchaGatewayFactory($store))->create(['hmac_key' => getenv('ALTCHA_HMAC_KEY'), 'script' => '/js/altcha.min.js']);
 ```
 
 ## In the page, or from a route
@@ -102,6 +114,8 @@ spends it: let the widget fetch a fresh one, from the Symfony bridge's route
 |---|---|
 | The whole way in PHP | **done on 2026-10-07**, by the tests and `docker compose run --rm omniguard bare --live`: a challenge issued, solved by `altcha-org/altcha`'s own `solveChallenge()` (what the widget does), verified, refused the second time (`duplicate`) and for another action (`action`); a challenge signed with another key, a wrong solution, an expired challenge refused |
 | The widget's script on jsDelivr | fetched on 2026-10-07: served, an ES module, its SHA-256 the `integrity` above |
+| The copy shipped in `public/` | **done on 2026-10-07**: npm's tarball `altcha-3.3.0.tgz` (the registry's SHA-1 checked), its `dist/main/altcha.min.js` of the same SHA-256 as jsDelivr's - asserted by the tests; licence MIT, its text beside it; read for what it loads: nothing (data: workers) |
+| The bridge serving it | **done on 2026-10-07** by the tests: the address answers the file, `text/javascript`, cached a year; the widget built by the bridge points there, no origin. In a browser: not done |
 | The widget in a browser | **not done**: no browser was run. Its attributes, its inline challenge and the payload it posts are read from its README and its code (`altcha` 3.3.0) |
 | Other algorithms | `SHA-256` by the tests; the PBKDF2 variants by the library's own |
 | `CacheReplayStore` under concurrent requests | not exercised: PSR-6 has no atomic add - see the store's note |

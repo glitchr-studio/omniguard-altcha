@@ -28,7 +28,7 @@ use Omniguard\Replay\ReplayStoreInterface;
  *     expires: 600                         # seconds a challenge may be solved and posted in
  *     challenge_url: ~                     # where the widget fetches a challenge (the bridge's route); none: inline in the page
  *     field: altcha                        # the posted field
- *     script: https://cdn.jsdelivr.net/npm/altcha@3.3.0/dist/main/altcha.min.js   # serve it yourself: /js/altcha.min.js
+ *     script: https://cdn.jsdelivr.net/npm/altcha@3.3.0/dist/main/altcha.min.js   # in PHP alone; the Symfony bridge serves the package's own copy (SCRIPT_PATH)
  *     integrity: sha256-...                # the script's Subresource Integrity, set for the default address
  *     attributes: { auto: onsubmit, display: standard, language: fr }   # <altcha-widget>'s own attributes
  *     configuration: { hideFooter: true }  # its configuration attribute (JSON)
@@ -42,6 +42,13 @@ final class AltchaGatewayFactory extends GatewayFactory
     /** The widget, as published on npm (altcha 3.3.0, MIT) and served by jsDelivr. */
     public const SCRIPT = 'https://cdn.jsdelivr.net/npm/altcha@3.3.0/dist/main/altcha.min.js';
     public const INTEGRITY = 'sha256-/CeoPc2Yo9is9tcPvkZD3L7lEqv7mIhu3Y7QRTUK2Ck=';
+    public const SCRIPT_VERSION = '3.3.0';
+
+    /** The same file, shipped in this package (public/, MIT): for the site to serve it itself. */
+    public const SCRIPT_FILE = __DIR__.'/public/altcha.min.js';
+
+    /** Where omniguard's Symfony bridge serves that file, and the address its gateways use by default. */
+    public const SCRIPT_PATH = '/omniguard/altcha/'.self::SCRIPT_VERSION.'/altcha.min.js';
 
     public function __construct(private readonly ?ReplayStoreInterface $replays = null)
     {
@@ -84,7 +91,8 @@ final class AltchaGatewayFactory extends GatewayFactory
             challengeUrl: $c->string('challenge_url'),
             field: $c->string('field') ?? 'altcha',
             script: $script,
-            integrity: $c->string('integrity') ?? (self::SCRIPT === $script ? self::INTEGRITY : null),
+            // The file pinned, on the CDN or from the bridge: its integrity is known.
+            integrity: $c->string('integrity') ?? (\in_array($script, [self::SCRIPT, self::SCRIPT_PATH], true) ? self::INTEGRITY : null),
             attributes: (array) $c['attributes'],
             configuration: (array) $c['configuration'],
         );

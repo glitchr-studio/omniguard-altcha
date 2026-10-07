@@ -29,7 +29,8 @@ omniguard:
             factory: altcha
             options:
                 hmac_key: '%env(ALTCHA_HMAC_KEY)%'     # required: long, random, secret
-                script: /js/altcha.min.js              # serve the widget yourself: not even a CDN sees the visitor
+                # the widget's script: served by the Symfony bridge from this package (public/, MIT), the
+                # page reaching nobody; in PHP alone a CDN by default - or copy public/altcha.min.js and name it
 ```
 
 **ALTCHA cannot tell a solution it saw before**: the gateway remembers each one in the

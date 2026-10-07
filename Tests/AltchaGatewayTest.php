@@ -136,6 +136,26 @@ final class AltchaGatewayTest extends TestCase
         self::assertSame('/c?k=1&action=a%20b', $this->gateway(['challenge_url' => '/c?k=1'])->widget('a b')->attributes['challenge']);
     }
 
+    public function testThePackageShipsThePinnedWidgetUnderItsLicence(): void
+    {
+        // The file served by the Symfony bridge is the very one the CDN serves: same integrity.
+        self::assertFileExists(AltchaGatewayFactory::SCRIPT_FILE);
+        self::assertSame(AltchaGatewayFactory::INTEGRITY, 'sha256-'.base64_encode(hash_file('sha256', AltchaGatewayFactory::SCRIPT_FILE, true)));
+        self::assertStringContainsString('MIT License', (string) file_get_contents(\dirname(AltchaGatewayFactory::SCRIPT_FILE).'/altcha.LICENSE.txt'));
+        self::assertStringContainsString(AltchaGatewayFactory::SCRIPT_VERSION, AltchaGatewayFactory::SCRIPT_PATH);
+        self::assertStringContainsString('@'.AltchaGatewayFactory::SCRIPT_VERSION.'/', AltchaGatewayFactory::SCRIPT);
+
+        // At the bridge's address: pinned, checked, and nobody else's.
+        $widget = $this->gateway(['script' => AltchaGatewayFactory::SCRIPT_PATH])->widget();
+        self::assertSame([], $widget->origins);
+        self::assertFalse($widget->reachesOthers());
+        self::assertSame(AltchaGatewayFactory::INTEGRITY, $widget->scriptAttributes['integrity'] ?? null);
+        self::assertArrayNotHasKey('crossorigin', $widget->scriptAttributes);
+
+        // In PHP alone, without the bridge, the CDN stays the default.
+        self::assertSame(AltchaGatewayFactory::SCRIPT, $this->gateway()->widget()->script);
+    }
+
     public function testOtherAlgorithmsAndWhatIsMisconfigured(): void
     {
         $gateway = $this->gateway(['algorithm' => 'SHA-256', 'cost' => 1]);
