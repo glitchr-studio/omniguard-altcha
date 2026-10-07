@@ -119,7 +119,7 @@ final class AltchaGatewayTest extends TestCase
         $challenge = json_decode((string) $widget->attributes['challenge'], true);
         self::assertSame(['parameters', 'signature'], array_keys($challenge));
         self::assertSame(['PBKDF2/SHA-256', 10, '00', 'contact'], [$challenge['parameters']['algorithm'], $challenge['parameters']['cost'], $challenge['parameters']['keyPrefix'], $challenge['parameters']['data']['action']]);
-        self::assertSame(['name' => 'altcha', 'auto' => 'onsubmit', 'language' => 'fr', 'configuration' => '{"hideFooter":true}'], array_diff_key($widget->attributes, ['challenge' => 1]));
+        self::assertSame(['name' => 'altcha', 'language' => 'fr', 'auto' => 'onsubmit', 'configuration' => '{"hideFooter":true}'], array_diff_key($widget->attributes, ['challenge' => 1]));
         self::assertStringStartsWith('<script src="https://cdn.jsdelivr.net/npm/altcha@3.3.0/dist/main/altcha.min.js" type="module" async defer integrity="sha256-', $widget->html());
         self::assertStringContainsString('<altcha-widget challenge="{&quot;parameters&quot;:', $widget->html());
     }
@@ -154,6 +154,49 @@ final class AltchaGatewayTest extends TestCase
 
         // In PHP alone, without the bridge, the CDN stays the default.
         self::assertSame(AltchaGatewayFactory::SCRIPT, $this->gateway()->widget()->script);
+    }
+
+    public function testTheWidgetSpeaksTheLanguageItIsGiven(): void
+    {
+        // Nothing given: the widget's own English, no script of ours.
+        $english = $this->gateway()->widget();
+        self::assertArrayNotHasKey('language', $english->attributes);
+        self::assertNull($english->inline);
+
+        // In PHP alone: the language and the texts as options.
+        $widget = $this->gateway(['language' => 'fr_FR', 'strings' => ['label' => 'Je ne suis pas un robot', 'verified' => 'Vérifié', 'error' => '']])->widget('contact');
+        self::assertSame('fr-fr', $widget->attributes['language']);
+        self::assertNotNull($widget->inline);
+        self::assertStringContainsString('globalThis.$altcha', $widget->inline);
+        self::assertStringEndsWith('})("fr-fr",{"label":"Je ne suis pas un robot","verified":"Vérifié"});', $widget->inline, 'an empty text is left to the widget');
+        self::assertStringEndsWith('</script>', $widget->html());
+        self::assertStringContainsString('<script nonce="n0nce">(function(l,s)', $widget->html('n0nce'), 'a nonce for a strict policy');
+
+        // Markup in a text cannot close the script.
+        $hostile = $this->gateway(['strings' => ['label' => '</script><script>alert(1)</script>']])->widget();
+        self::assertStringNotContainsString('</script><script>alert', (string) $hostile->inline);
+        self::assertStringContainsString('})("en",{', (string) $hostile->inline, 'texts without a language: the default one\'s');
+    }
+
+    public function testALocalizedCopyKeepsTheTextsTheGatewayWasGiven(): void
+    {
+        $gateway = $this->gateway(['strings' => ['label' => 'Pas un robot, promis']]);
+        self::assertSame(AltchaGateway::TEXTS, $gateway->texts());
+
+        $french = $gateway->localized('fr', ['label' => 'Je ne suis pas un robot', 'verifying' => 'Vérification…']);
+        self::assertNotSame($gateway, $french);
+        $widget = $french->widget();
+        self::assertSame('fr', $widget->attributes['language']);
+        self::assertStringEndsWith('})("fr",{"label":"Pas un robot, promis","verifying":"Vérification…"});', (string) $widget->inline, 'the option wins over the translation');
+        self::assertArrayNotHasKey('language', $gateway->widget()->attributes, 'the gateway itself is left as it was');
+
+        // A language the gateway was given wins over the visitor's - as an option or as the widget's attribute.
+        self::assertNull($gateway->language());
+        foreach ([['language' => 'de'], ['attributes' => ['language' => 'DE']]] as $options) {
+            $german = $this->gateway($options);
+            self::assertSame('de', $german->language());
+            self::assertSame('de', $german->localized('fr')->widget()->attributes['language']);
+        }
     }
 
     public function testOtherAlgorithmsAndWhatIsMisconfigured(): void

@@ -69,6 +69,8 @@ ALTCHA does not know where the widget was shown.
 | `integrity` | | the script's Subresource Integrity, for another address |
 | `attributes` | `{}` | `<altcha-widget>`'s own attributes: `auto` (`onsubmit`, `onfocus`, `onload`), `display`, `language`, `type`, `theme`, `workers` |
 | `configuration` | `{}` | its `configuration` attribute, as JSON: `{hideFooter: true}`, `{minDuration: 1000}` |
+| `language` | none: the visitor's (in Symfony, the request's) | the widget's language, its `language` attribute: `fr`, `de`, `pt-br` |
+| `strings` | `{}` | its texts, by name (`AltchaGateway::TEXTS`): `{label: "Pas un robot", verified: "Merci"}` |
 
 The widget is printed as `<script type="module" async defer>` and `<altcha-widget challenge="..."
 name="altcha">`.
@@ -100,6 +102,37 @@ cp vendor/omniguard/altcha/public/altcha.min.js public/js/altcha.min.js
 $gateway = (new AltchaGatewayFactory($store))->create(['hmac_key' => getenv('ALTCHA_HMAC_KEY'), 'script' => '/js/altcha.min.js']);
 ```
 
+## Its texts, in the visitor's language
+
+The script carries English only. Its texts - "I'm not a robot", "Verifying...", "Verified",
+"Verification failed. Try again later.", the footer "Protected by ALTCHA" and the others of
+`AltchaGateway::TEXTS` - are given to it by a short script printed after the element
+(`Widget::$inline`, its nonce with the others), which registers them with the widget
+(`globalThis.$altcha.i18n`) for its `language`; a text left out stays the widget's English.
+
+**In a Symfony application** the bridge does it for every widget it prints: the request's locale,
+the texts of its translation domain `omniguard` (`altcha.label`, `altcha.verifying`...), shipped in
+French, English, German and Japanese - an application's `translations/omniguard.<locale>.yaml`
+overrides any of them, or adds a language. The `language` option fixes the widget's language
+whatever the visitor's; the `strings` option wins over the translations:
+
+```yaml
+omniguard:
+    gateways:
+        forms:
+            factory: altcha
+            options:
+                hmac_key: '%env(ALTCHA_HMAC_KEY)%'
+                strings: { label: "Je ne suis pas un robot, promis" }
+```
+
+**In PHP alone** give them as options, or to `localized()`:
+
+```php
+$gateway = $factory->create(['hmac_key' => $key, 'language' => 'fr', 'strings' => ['label' => 'Je ne suis pas un robot', 'verifying' => 'Vérification…', 'verified' => 'Vérifié']]);
+$french = $gateway->localized('fr', $texts);   // a copy; the gateway's own language and strings still win
+```
+
 ## In the page, or from a route
 
 Without `challenge_url` the challenge travels in the page, as the widget's `challenge` attribute
@@ -117,5 +150,6 @@ spends it: let the widget fetch a fresh one, from the Symfony bridge's route
 | The copy shipped in `public/` | **done on 2026-10-07**: npm's tarball `altcha-3.3.0.tgz` (the registry's SHA-1 checked), its `dist/main/altcha.min.js` of the same SHA-256 as jsDelivr's - asserted by the tests; licence MIT, its text beside it; read for what it loads: nothing (data: workers) |
 | The bridge serving it | **done on 2026-10-07** by the tests: the address answers the file, `text/javascript`, cached a year; the widget built by the bridge points there, no origin. In a browser: not done |
 | The widget in a browser | **not done**: no browser was run. Its attributes, its inline challenge and the payload it posts are read from its README and its code (`altcha` 3.3.0) |
+| Its texts | **done on 2026-10-07** by the tests: the `language` attribute and the script registering the texts, the bridge's four catalogues complete (every name of `TEXTS`), the request's locale followed, `language` and `strings` winning. The registry's API (`$altcha.i18n.get/set`) and the way the widget picks its language (its attribute, `<html lang>`, the browser's) read from its code (`altcha` 3.3.0). In a browser: not done |
 | Other algorithms | `SHA-256` by the tests; the PBKDF2 variants by the library's own |
 | `CacheReplayStore` under concurrent requests | not exercised: PSR-6 has no atomic add - see the store's note |

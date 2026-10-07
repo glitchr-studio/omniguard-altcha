@@ -32,6 +32,8 @@ use Omniguard\Replay\ReplayStoreInterface;
  *     integrity: sha256-...                # the script's Subresource Integrity, set for the default address
  *     attributes: { auto: onsubmit, display: standard, language: fr }   # <altcha-widget>'s own attributes
  *     configuration: { hideFooter: true }  # its configuration attribute (JSON)
+ *     language: fr                         # the widget's language (its language attribute)
+ *     strings: { label: "Je ne suis pas un robot" }   # its texts, by name (AltchaGateway::TEXTS); they win over the bridge's translations
  *
  * Spent solutions are remembered in the ReplayStoreInterface given to the
  * factory - the application's, shared by every request. Without one, this
@@ -70,6 +72,8 @@ final class AltchaGatewayFactory extends GatewayFactory
             'integrity' => null,
             'attributes' => [],
             'configuration' => [],
+            'language' => null,
+            'strings' => [],
         ]);
     }
 
@@ -95,6 +99,8 @@ final class AltchaGatewayFactory extends GatewayFactory
             integrity: $c->string('integrity') ?? (\in_array($script, [self::SCRIPT, self::SCRIPT_PATH], true) ? self::INTEGRITY : null),
             attributes: (array) $c['attributes'],
             configuration: (array) $c['configuration'],
+            language: $c->string('language'),
+            strings: (array) $c['strings'],
         );
     }
 
