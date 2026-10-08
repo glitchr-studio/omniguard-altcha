@@ -10,7 +10,7 @@
 
 It is the work of Daniel Regeci and BAU Software s.r.o., under the MIT License: its text, from the
 package, is `altcha.LICENSE.txt` beside it. The rest of omniguard/altcha is under the
-LGPL-3.0-or-later.
+MIT License too, since 2026-10-09 (earlier versions remain published under LGPL-3.0-or-later).
 
 It loads nothing else: its workers are built from data: URLs (a Content-Security-Policy needs
 `worker-src 'self' data:`), and the only addresses it holds are a link to altcha.org in its footer

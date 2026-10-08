@@ -42,4 +42,4 @@ Without one, this process's memory: right in a test or a worker, not behind PHP-
 or from a route, the action, what was verified - the whole way in PHP: issued, solved by the
 library, verified, refused when posted again.
 
-License: LGPL-3.0-or-later.
+License: MIT since 2026-10-09; earlier versions remain published under LGPL-3.0-or-later.
