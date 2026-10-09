@@ -1,6 +1,6 @@
-# omniguard/altcha
+# omnishield/altcha
 
-**ALTCHA** for [glitchr/omniguard](https://github.com/glitchr-studio/omniguard): a captcha the site
+**ALTCHA** for [glitchr/omnishield](https://github.com/glitchr-studio/omnishield): a captcha the site
 issues and checks itself. The visitor's browser solves a small proof of work - it derives keys
 until one starts as the challenge asks - and the site checks the solution: signed with the site's
 key, unexpired, for this action, and **never posted before**. Nobody else is involved: no third
@@ -10,8 +10,8 @@ Built on the official [`altcha-org/altcha`](https://github.com/altcha-org/altcha
 MIT); the widget is the [`altcha`](https://www.npmjs.com/package/altcha) web component (MIT).
 
 ```php
-use Omniguard\Altcha\AltchaGatewayFactory;
-use Omniguard\Model\Attempt;
+use Omnishield\Altcha\AltchaGatewayFactory;
+use Omnishield\Model\Attempt;
 
 $gateway = (new AltchaGatewayFactory($spentTokens))->create(['hmac_key' => getenv('ALTCHA_HMAC_KEY')]);
 
@@ -23,7 +23,7 @@ $verdict->passed;                           // the second time: false, reasons [
 ```
 
 ```yaml
-omniguard:
+omnishield:
     gateways:
         forms:
             factory: altcha
@@ -43,3 +43,5 @@ or from a route, the action, what was verified - the whole way in PHP: issued, s
 library, verified, refused when posted again.
 
 License: MIT since 2026-10-09; earlier versions remain published under LGPL-3.0-or-later.
+
+Formerly `omniguard/altcha`, renamed on 2026-10-10 with its family (`glitchr/omnishield`).

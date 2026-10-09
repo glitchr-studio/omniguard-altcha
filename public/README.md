@@ -9,12 +9,12 @@
   (`AltchaGatewayFactory::INTEGRITY`), the same as jsDelivr serves.
 
 It is the work of Daniel Regeci and BAU Software s.r.o., under the MIT License: its text, from the
-package, is `altcha.LICENSE.txt` beside it. The rest of omniguard/altcha is under the
+package, is `altcha.LICENSE.txt` beside it. The rest of omnishield/altcha is under the
 MIT License too, since 2026-10-09 (earlier versions remain published under LGPL-3.0-or-later).
 
 It loads nothing else: its workers are built from data: URLs (a Content-Security-Policy needs
 `worker-src 'self' data:`), and the only addresses it holds are a link to altcha.org in its footer
 (`configuration: {hideFooter: true}`) and Svelte's error pages.
 
-Served by the Symfony bridge at `/omniguard/altcha/3.3.0/altcha.min.js`; outside Symfony, copy it
+Served by the Symfony bridge at `/omnishield/altcha/3.3.0/altcha.min.js`; outside Symfony, copy it
 where the site serves its scripts (`AltchaGatewayFactory::SCRIPT_FILE`).

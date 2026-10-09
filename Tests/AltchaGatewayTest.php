@@ -1,6 +1,6 @@
 <?php
 
-namespace Omniguard\Altcha\Tests;
+namespace Omnishield\Altcha\Tests;
 
 use AltchaOrg\Altcha\Altcha;
 use AltchaOrg\Altcha\Challenge;
@@ -8,12 +8,12 @@ use AltchaOrg\Altcha\CreateChallengeOptions;
 use AltchaOrg\Altcha\Payload;
 use AltchaOrg\Altcha\Solution;
 use AltchaOrg\Altcha\SolveChallengeOptions;
-use Omniguard\Altcha\AltchaGateway;
-use Omniguard\Altcha\AltchaGatewayFactory;
-use Omniguard\Exception\InvalidConfigException;
-use Omniguard\Model\Attempt;
-use Omniguard\Model\Verdict;
-use Omniguard\Replay\InMemoryReplayStore;
+use Omnishield\Altcha\AltchaGateway;
+use Omnishield\Altcha\AltchaGatewayFactory;
+use Omnishield\Exception\InvalidConfigException;
+use Omnishield\Model\Attempt;
+use Omnishield\Model\Verdict;
+use Omnishield\Replay\InMemoryReplayStore;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -126,9 +126,9 @@ final class AltchaGatewayTest extends TestCase
 
     public function testASelfHostedScriptAndAChallengeRouteLeaveNoOrigin(): void
     {
-        $widget = $this->gateway(['script' => '/js/altcha.min.js', 'challenge_url' => '/omniguard/forms/challenge', 'field' => 'captcha'])->widget('contact');
+        $widget = $this->gateway(['script' => '/js/altcha.min.js', 'challenge_url' => '/omnishield/forms/challenge', 'field' => 'captcha'])->widget('contact');
 
-        self::assertSame('/omniguard/forms/challenge?action=contact', $widget->attributes['challenge']);
+        self::assertSame('/omnishield/forms/challenge?action=contact', $widget->attributes['challenge']);
         self::assertSame('captcha', $widget->field);
         self::assertSame([], $widget->origins);
         self::assertFalse($widget->reachesOthers());

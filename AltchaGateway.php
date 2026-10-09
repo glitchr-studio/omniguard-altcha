@@ -1,19 +1,19 @@
 <?php
 
-namespace Omniguard\Altcha;
+namespace Omnishield\Altcha;
 
 use AltchaOrg\Altcha\Algorithm\DeriveKeyInterface;
 use AltchaOrg\Altcha\Altcha;
 use AltchaOrg\Altcha\CreateChallengeOptions;
 use AltchaOrg\Altcha\Payload;
 use AltchaOrg\Altcha\VerifySolutionOptions;
-use Omniguard\ChallengeIssuerInterface;
-use Omniguard\LocalizableInterface;
-use Omniguard\Model\Attempt;
-use Omniguard\Model\Capabilities;
-use Omniguard\Model\Verdict;
-use Omniguard\Model\Widget;
-use Omniguard\Replay\ReplayStoreInterface;
+use Omnishield\ChallengeIssuerInterface;
+use Omnishield\LocalizableInterface;
+use Omnishield\Model\Attempt;
+use Omnishield\Model\Capabilities;
+use Omnishield\Model\Verdict;
+use Omnishield\Model\Widget;
+use Omnishield\Replay\ReplayStoreInterface;
 
 /**
  * An ALTCHA challenge issued, solved by the visitor's browser, checked here:

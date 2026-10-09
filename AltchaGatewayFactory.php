@@ -1,18 +1,18 @@
 <?php
 
-namespace Omniguard\Altcha;
+namespace Omnishield\Altcha;
 
 use AltchaOrg\Altcha\Algorithm\DeriveKeyInterface;
 use AltchaOrg\Altcha\Algorithm\Pbkdf2;
 use AltchaOrg\Altcha\Algorithm\Sha;
 use AltchaOrg\Altcha\Algorithm\ShaAlgorithm;
 use AltchaOrg\Altcha\HmacAlgorithm;
-use Omniguard\Config;
-use Omniguard\Exception\InvalidConfigException;
-use Omniguard\GatewayFactory;
-use Omniguard\GatewayInterface;
-use Omniguard\Replay\InMemoryReplayStore;
-use Omniguard\Replay\ReplayStoreInterface;
+use Omnishield\Config;
+use Omnishield\Exception\InvalidConfigException;
+use Omnishield\GatewayFactory;
+use Omnishield\GatewayInterface;
+use Omnishield\Replay\InMemoryReplayStore;
+use Omnishield\Replay\ReplayStoreInterface;
 
 /**
  * ALTCHA: a proof of work the site issues and checks itself - the visitor's
@@ -49,8 +49,8 @@ final class AltchaGatewayFactory extends GatewayFactory
     /** The same file, shipped in this package (public/, MIT): for the site to serve it itself. */
     public const SCRIPT_FILE = __DIR__.'/public/altcha.min.js';
 
-    /** Where omniguard's Symfony bridge serves that file, and the address its gateways use by default. */
-    public const SCRIPT_PATH = '/omniguard/altcha/'.self::SCRIPT_VERSION.'/altcha.min.js';
+    /** Where omnishield's Symfony bridge serves that file, and the address its gateways use by default. */
+    public const SCRIPT_PATH = '/omnishield/altcha/'.self::SCRIPT_VERSION.'/altcha.min.js';
 
     public function __construct(private readonly ?ReplayStoreInterface $replays = null)
     {
@@ -59,9 +59,9 @@ final class AltchaGatewayFactory extends GatewayFactory
     protected function populate(Config $c): void
     {
         $c->defaults([
-            'omniguard.factory_name' => 'altcha',
-            'omniguard.factory_title' => 'ALTCHA',
-            'omniguard.required_options' => ['hmac_key'],
+            'omnishield.factory_name' => 'altcha',
+            'omnishield.factory_title' => 'ALTCHA',
+            'omnishield.required_options' => ['hmac_key'],
             'algorithm' => 'PBKDF2/SHA-256',
             'cost' => 5000,
             'key_prefix' => '00',
